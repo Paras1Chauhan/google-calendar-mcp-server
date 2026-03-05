@@ -3,6 +3,9 @@
   "version": "1.0.2",
   "description": "MCP server for Google Calendar - schedule meetings, create Google Meet links, manage events",
   "main": "dist/index.js",
+  "bin": {
+    "google-calendar-mcp-server-paras": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
