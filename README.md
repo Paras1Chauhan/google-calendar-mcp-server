@@ -1,177 +1,129 @@
 # 🗓️ Google Calendar MCP Server
 
-A Model Context Protocol (MCP) server that lets Claude schedule Google Meet meetings, manage calendar events, and check availability — all through natural language!
+A powerful **Model Context Protocol (MCP)** server that integrates Google Calendar with Claude AI — allowing you to manage your calendar using natural language.
+
+[![npm version](https://img.shields.io/npm/v/google-calendar-mcp-server-paras.svg)](https://www.npmjs.com/package/google-calendar-mcp-server-paras)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
 ---
 
 ## ✨ Features
 
-| Tool | Description |
-|------|-------------|
-| `calendar_authenticate` | One-time Google OAuth 2.0 setup |
-| `calendar_create_meeting` | Create events with auto Google Meet links |
-| `calendar_list_events` | List upcoming events with filters |
-| `calendar_get_event` | Get full details of a specific event |
-| `calendar_update_event` | Update title, time, attendees, etc. |
-| `calendar_delete_event` | Cancel and notify all attendees |
-| `calendar_check_availability` | Check free/busy for multiple people |
-| `calendar_list_calendars` | List all your Google Calendars |
+- 📅 **List Events** — View upcoming events with full details
+- ➕ **Create Events** — Schedule meetings with titles, locations, and attendees
+- ✏️ **Update Events** — Modify existing events easily
+- 🗑️ **Delete Events** — Remove events from your calendar
+- 📆 **Multiple Calendars** — Support for all your Google Calendars
+- 🔐 **Secure Auth** — OAuth 2.0 authentication with Google
 
 ---
 
-## 🚀 Setup (Step-by-Step)
+## 📋 Prerequisites
 
-### Step 1: Google Cloud Project Setup
+- [Node.js](https://nodejs.org/) v16 or higher
+- A [Google Cloud Platform](https://console.cloud.google.com) account
+- Google Calendar API enabled
+- OAuth 2.0 credentials
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project (or select existing)
-3. Enable **Google Calendar API**:
-   - Go to **APIs & Services → Library**
-   - Search "Google Calendar API" → Enable it
-4. Create **OAuth 2.0 Credentials**:
-   - Go to **APIs & Services → Credentials**
-   - Click **Create Credentials → OAuth client ID**
-   - Choose **Web application**
-   - Add Authorized redirect URI: `http://localhost:3000/oauth2callback`
-   - Download credentials JSON
+---
 
-### Step 2: Install & Configure
+## 🔑 Step 1 — Get Google API Credentials
 
-```bash
-# Clone/copy this project
-cd google-calendar-mcp-server
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a **new project**
+3. Go to **APIs & Services** → **Enable APIs** → Enable **Google Calendar API**
+4. Go to **APIs & Services** → **Credentials**
+5. Click **"Create Credentials"** → **"OAuth 2.0 Client ID"**
+6. Choose **"Web Application"** as the application type
+7. Add `http://localhost:3000/callback` to **Authorized Redirect URIs**
+8. Click **Create** and copy your:
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
 
-# Install dependencies
-npm install
+---
 
-# Copy env file and fill in your credentials
-cp .env.example .env
-# Edit .env with your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
+## 🚀 Step 2 — Add to Claude Desktop
 
-# Build TypeScript
-npm run build
-```
+Open your Claude Desktop config file:
 
-### Step 3: Configure Claude Desktop
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-Add to your Claude Desktop config file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+Add this configuration:
 
 ```json
 {
   "mcpServers": {
     "google-calendar": {
-      "command": "node",
-      "args": ["/absolute/path/to/google-calendar-mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "google-calendar-mcp-server-paras"],
       "env": {
-        "GOOGLE_CLIENT_ID": "your_client_id",
-        "GOOGLE_CLIENT_SECRET": "your_client_secret",
-        "TRANSPORT": "stdio"
+        "GOOGLE_CLIENT_ID": "your-client-id-here",
+        "GOOGLE_CLIENT_SECRET": "your-client-secret-here",
+        "GOOGLE_REDIRECT_URI": "http://localhost:3000/callback"
       }
     }
   }
 }
 ```
 
-### Step 4: Authenticate (One Time)
+---
 
-In Claude, say:
-> "Authenticate my Google Calendar"
+## Step 3 — Restart Claude Desktop
 
-Claude will call `calendar_authenticate` and give you a URL. Open it, sign in, and paste the code back.
+That's it! No installation needed — `npx` handles everything automatically. ✅
 
 ---
 
-## 💬 Example Prompts
+## 💬 Usage Examples
 
 Once set up, just talk to Claude naturally:
 
-```
-"Schedule a team meeting tomorrow at 10am to 11am and add a Google Meet link"
+**Listing Events**
+> "Show me my upcoming events"
+> "What's on my calendar this week?"
+> "List all events for tomorrow"
 
-"What meetings do I have this week?"
+**Creating Events**
+> "Schedule a meeting with John tomorrow at 2pm"
+> "Create a team lunch next Friday at 12pm"
+> "Add a doctor's appointment on Monday at 10am"
 
-"Is Sarah (sarah@company.com) free on Friday afternoon?"
+**Updating Events**
+> "Move my 2pm meeting to 3pm"
+> "Add Sarah to tomorrow's team meeting"
+> "Update the location of Friday's meeting to Zoom"
 
-"Move the 3pm meeting to 4pm"
-
-"Cancel the Monday standup and notify everyone"
-
-"Show me all meetings with the word 'sprint' in the title"
-```
-
----
-
-## 📁 Project Structure
-
-```
-google-calendar-mcp-server/
-├── src/
-│   ├── index.ts              # Entry point & transport setup
-│   ├── types.ts              # TypeScript interfaces
-│   ├── constants.ts          # Config constants
-│   ├── tools/
-│   │   └── calendarTools.ts  # All 8 MCP tools
-│   ├── services/
-│   │   └── calendarService.ts # Google API client & helpers
-│   └── schemas/
-│       └── index.ts          # Zod validation schemas
-├── dist/                     # Compiled JS (after npm run build)
-├── token.json                # Saved OAuth token (auto-created)
-├── .env.example
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+**Deleting Events**
+> "Cancel my 3pm meeting today"
+> "Remove the team lunch from next Friday"
 
 ---
 
-## 🔐 Authentication Flow
+## 🔧 Environment Variables
 
-```
-You → Claude → calendar_authenticate (no code)
-           ↓
-      Returns Google Auth URL
-           ↓
-You → Open URL in browser → Sign in with Google
-           ↓
-      Redirected to localhost:3000/oauth2callback?code=ABC123
-           ↓
-You → Claude → calendar_authenticate(code="ABC123")
-           ↓
-      Token saved to token.json ✅
-```
+| Variable | Description | Example |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` | OAuth 2.0 Client ID | `123456789.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | OAuth 2.0 Client Secret | `GOCSPX-xxxxx` |
+| `GOOGLE_REDIRECT_URI` | OAuth Redirect URI | `http://localhost:3000/callback` |
 
 ---
 
-## 🛠️ Development
+## 🛡️ Security
 
-```bash
-# Run in development mode (with ts-node)
-npm run dev
-
-# Build for production
-npm run build
-
-# Run built server
-npm start
-
-# Test with MCP Inspector
-npx @modelcontextprotocol/inspector node dist/index.js
-```
+- All credentials are stored securely via environment variables
+- OAuth 2.0 ensures secure access to Google Calendar
+- No credentials are ever committed to version control
 
 ---
 
-## 🌍 Timezone
+## 🤝 Contributing
 
-Default timezone is set to `Asia/Kolkata` (IST). You can override per-request using the `timeZone` parameter.
+Contributions are welcome! Feel free to open a Pull Request or Issue.
 
 ---
 
-## 📋 Requirements
+## 📄 License
 
-- Node.js 18+
-- Google Cloud account (free tier is fine)
-- Claude Desktop app
+ISC © [paras0511](https://www.npmjs.com/~paras0511)
